@@ -1,0 +1,373 @@
+#!/bin/bash
+# go to root
+cd
+# update upgrade
+apt-get update; apt-get -y dist-upgrade;
+apt-get install -y screen unzip wget curl git netcat tcpd tor build-essential checkinstall zlib1g-dev libsctp-dev cmake make gcc dropbear zlib1g-dev libwrap0-dev certbot python3-certbot-nginx
+# use no check certificate
+echo "check_certificate = off" >> ~/.wgetrc
+# Create and Configure rc.local
+cat > /etc/rc.local <<-END
+#!/bin/sh -e
+exit 0
+END
+chmod +x /etc/rc.local
+# Create rc.d
+cd /etc
+mkdir rc.d
+chmod +x rc.d
+cat > /etc/rc.d/rc.local <<-END
+#!/bin/sh -e
+exit 0
+END
+chmod +x /etc/rc.d/rc.local
+# set time GMT +7
+ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime
+#  set locale
+sed -i 's/AcceptEnv/#AcceptEnv/g' /etc/ssh/sshd_config
+service ssh restart
+# dsable ipv6
+echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6
+sed -i '$ i\echo 1 > /proc/sys/net/ipv6/conf/all/disable_ipv6' /etc/rc.local
+# Upgrade openssl
+cd
+cd /usr/local/src/
+wget https://www.openssl.org/source/openssl-1.1.1k.tar.gz
+tar xzf openssl-1.1.1k.tar.gz
+cd openssl-1.1.1k
+sudo ./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl shared zlib enable-ssl2 enable-ssl3 enable-tls1_3 enable-dtls
+make && make test && make install
+cd /etc/ld.so.conf.d/
+cat > openssl-1.1.1k.conf <<-END
+/usr/local/ssl/lib
+END
+sudo ldconfig -v
+sudo mv /usr/bin/c_rehash /usr/bin/c_rehash.backup
+sudo mv /usr/bin/openssl /usr/bin/openssl.backup
+rm /etc/environment
+cat > /etc/environment <<-END
+PATH="/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/usr/local/ssl/bin"
+END
+source /etc/environment
+echo $PATH
+which openssl
+openssl version -a
+# Install badvpn deb/ubun
+cd
+wget https://github.com/ambrop72/badvpn/archive/1.999.130.tar.gz && tar xzf 1.999.130.tar.gz
+mkdir badvpn-build
+cd badvpn-build
+cmake ~/badvpn-1.999.130 -DBUILD_NOTHING_BY_DEFAULT=1 -DBUILD_UDPGW=1
+make install
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7000 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7100 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7200 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7400 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7500 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7600 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7700 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7800 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7900 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7000 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.d/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7100 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.d/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7200 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.d/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.d/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7400 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.d/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7500 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.d/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7600 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.d/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7700 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.d/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7800 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.d/rc.local
+sed -i '$ i\screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7900 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &' /etc/rc.d/rc.local
+chmod +x /usr/local/bin/badvpn-udpgw
+chmod +x /usr/local/share/man/man7/badvpn.7
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7000 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7100 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7200 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7300 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7400 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7500 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7600 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7700 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7800 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+screen -AmdS badvpn badvpn-udpgw --listen-addr 127.0.0.1:7900 --max-clients 1000 --max-connections-for-client 1000 > /dev/null &
+# Dropbear
+sed -i 's/NO_START=1/NO_START=0/g' /etc/default/dropbear
+sed -i 's/DROPBEAR_PORT=22/DROPBEAR_PORT=3128/g' /etc/default/dropbear
+sed -i 's/DROPBEAR_EXTRA_ARGS=/DROPBEAR_EXTRA_ARGS=""/g' /etc/default/dropbear
+echo "/bin/false" >> /etc/shells
+echo "/usr/sbin/nologin" >> /etc/shells
+service ssh restart
+service dropbear restart
+# Upgrade Dropbear
+cd
+wget https://matt.ucc.asn.au/dropbear/releases/dropbear-2020.81.tar.bz2
+bzip2 -cd dropbear-2020.81.tar.bz2 | tar xvf -
+cd dropbear-2020.81
+./configure
+make && make install
+mv /usr/sbin/dropbear /usr/sbin/dropbear.old
+ln /usr/local/sbin/dropbear /usr/sbin/dropbear
+cd && rm -rf dropbear-2020.81 && rm -rf dropbear-2020.81.tar.bz2
+service dropbear restart
+# login setting
+echo "/bin/false" >> /etc/shells
+echo "/usr/sbin/nologin" >> /etc/shells
+# set ipv4 forward
+echo 1 > /proc/sys/net/ipv4/ip_forward
+sed -i 's|#net.ipv4.ip_forward=1|net.ipv4.ip_forward=1|' /etc/sysctl.conf
+# menu
+cd /usr/local/bin/
+wget https://raw.githubusercontent.com/demonk1992/membagongkan/main/menu.zip && unzip menu.zip
+chmod +x /usr/local/bin/*
+# Stunel
+wget ftp://ftp.stunnel.org/stunnel/archive/5.x/stunnel-5.58.tar.gz
+tar -xf stunnel-5.58.tar.gz && cd stunnel-5.58
+groupadd -g 51 stunnel &&
+useradd -c "stunnel Daemon" -d /var/lib/stunnel \
+        -g stunnel -s /bin/false -u 51 stunnel
+
+./configure --prefix=/usr        \
+            --sysconfdir=/etc    \
+            --localstatedir=/var \
+            --without-libwrap \
+            --disable-systemd    &&
+make
+make docdir=/usr/share/doc/stunnel-5.58 install
+
+install -v -m750 -o stunnel -g stunnel -d /var/lib/stunnel/run &&
+chown stunnel:stunnel /var/lib/stunnel
+
+cat > /etc/stunnel/stunnel.conf << "EOF" 
+; File: /etc/stunnel/stunnel.conf
+
+; Note: The pid and output locations are relative to the chroot location.
+
+pid    = /run/stunnel.pid
+chroot = /var/lib/stunnel
+client = no
+setuid = stunnel
+setgid = stunnel
+cert   = /root/stunnel.pem
+socket = a:SO_REUSEADDR=1
+socket = l:TCP_NODELAY=1
+socket = r:TCP_NODELAY=1
+ciphers = TLS13-AES128-GCM-SHA256:TLS13-AES256-GCM-SHA384:TLS13-CHACHA20-POLY1305-SHA256:TLS13-AES128-CCM-SHA256:TLS13-AES128-CCM-8-SHA256:TLS13-AES128-CCM8-SHA256:TLS13-SHA256-SHA256:TLS13-SHA384-SHA384:DHE-RSA-AES128-SHA:DHE-RSA-AES256-SHA:DHE-PSK-AES256-GCM-SHA384:DHE-PSK-AES128-GCM-SHA256:DHE-PSK-AES256-CBC-SHA384:DHE-PSK-AES128-CBC-SHA256:DHE-PSK-AES128-CCM:DHE-PSK-AES256-CCM:DHE-PSK-NULL-SHA384:DHE-PSK-NULL-SHA256:ECDHE-ECDSA-AES128-CCM:ECDHE-ECDSA-AES128-CCM-8:ECDHE-ECDSA-AES128-CCM8:ECDHE-ECDSA-AES256-CCM-8:ECDHE-ECDSA-AES256-CCM8:ECDHE-RSA-AES128-SHA:ECDHE-RSA-AES256-SHA:ECDHE-ECDSA-AES128-SHA:ECDHE-ECDSA-AES256-SHA:ECDHE-RSA-RC4-SHA:ECDHE-RSA-DES-CBC3-SHA:ECDHE-ECDSA-RC4-SHA:ECDHE-ECDSA-DES-CBC3-SHA:DHE-RSA-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:DHE-RSA-CAMELLIA128-SHA:DHE-RSA-CAMELLIA256-SHA:DHE-RSA-CAMELLIA128-SHA256:DHE-RSA-CAMELLIA256-SHA256:ECDHE-RSA-AES128-SHA256:ECDHE-ECDSA-AES128-SHA256:ECDHE-RSA-AES256-SHA384:ECDHE-ECDSA-AES256-SHA384:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-CHACHA20-POLY1305:DHE-RSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305-OLD:ECDHE-ECDSA-CHACHA20-POLY1305-OLD:DHE-RSA-CHACHA20-POLY1305-OLD:ADH-AES128-SHA:ADH-AES256-GCM-SHA384:ECDHE-ECDSA-NULL-SHA:ECDHE-PSK-NULL-SHA256:ECDHE-PSK-AES128-CBC-SHA256:PSK-CHACHA20-POLY1305:ECDHE-PSK-CHACHA20-POLY1305:DHE-PSK-CHACHA20-POLY1305:EDH-RSA-DES-CBC3-SHA:WDM-NULL-SHA256
+delay = no
+OCSPaia = yes
+engine = auto
+
+[https]
+accept  = 443
+connect = 22
+;; "TIMEOUTclose = 0" is a workaround for a design flaw in Microsoft SSL
+;; Microsoft implementations do not use SSL close-notify alert and thus
+;; they are vulnerable to truncation attacks
+TIMEOUTclose = 0
+
+EOF
+openssl req -new -newkey rsa:2048 -days 3650 \
+  -nodes -x509 -sha256 \
+  -subj '/CN=LocalHost' \
+  -keyout /root/stunnel.pem \
+  -out /root/stunnel.pem
+wget http://anduin.linuxfromscratch.org/BLFS/blfs-bootscripts/blfs-bootscripts-20210110.tar.xz
+tar -xf blfs-bootscripts-20210110.tar.xz
+cd blfs-bootscripts-20210110
+make install-stunnel
+/etc/rc.d/init.d/stunnel start
+sed -i '$ i\/etc/rc.d/init.d/stunnel start > /dev/null &' /etc/rc.local
+# Install nginx
+cd
+wget http://nginx.org/download/nginx-1.18.0.tar.gz && tar zxf nginx-1.18.0.tar.gz
+cd nginx-1.18.0
+wget https://www.openssl.org/source/openssl-1.1.1i.tar.gz && tar xzf openssl-1.1.1i.tar.gz
+git clone https://github.com/openresty/headers-more-nginx-module
+wget https://ftp.pcre.org/pub/pcre/pcre-8.42.tar.gz && tar xzvf pcre-8.42.tar.gz
+wget https://www.zlib.net/zlib-1.2.11.tar.gz && tar xzvf zlib-1.2.11.tar.gz
+wget https://raw.githubusercontent.com/chobits/ngx_http_proxy_connect_module/master/patch/proxy_connect_rewrite_1018.patch
+sudo apt-get -y install libpcre3-dev
+sudo apt install -y perl libperl-dev libgd3 libgd-dev libgeoip1 libgeoip-dev geoip-bin libxml2 libxml2-dev libxslt1.1 libxslt1-dev
+sudo apt install -y build-essential git tree
+tree -L 2 .
+apt-get install -y cmake make gcc
+git clone https://github.com/chobits/ngx_http_proxy_connect_module.git /root/ngx_http_proxy_connect_module
+patch -p1 < /root/nginx-1.18.0/proxy_connect_rewrite_1018.patch
+./configure \
+--conf-path=/etc/nginx/nginx.conf \
+--sbin-path=/usr/sbin \
+--error-log-path=/var/log/nginx/error.log \
+--with-threads \
+--with-stream \
+--pid-path=/run/nginx.pid \
+--with-stream_geoip_module \
+--with-stream_ssl_module \
+--add-module=/root/ngx_http_proxy_connect_module \
+--with-stream \
+--with-stream_ssl_preread_module \
+--with-stream_ssl_module \
+--with-http_stub_status_module \
+--with-http_realip_module \
+--with-threads \
+--with-http_image_filter_module \
+--with-stream_geoip_module \
+--with-pcre \
+--with-http_mp4_module \
+--with-http_secure_link_module \
+--with-http_v2_module \
+--with-http_flv_module \
+--add-module=headers-more-nginx-module \
+--with-http_geoip_module \
+--with-http_gzip_static_module \
+--with-http_stub_status_module \
+--with-http_ssl_module \
+--http-proxy-temp-path=/dev/shm/proxy_temp \
+--http-client-body-temp-path=/dev/shm/client_body_temp \
+--http-fastcgi-temp-path=/dev/shm/fastcgi_temp \
+--http-uwsgi-temp-path=/dev/shm/uwsgi_temp \
+--http-scgi-temp-path=/dev/shm/scgi_temp \
+--build="v1.11.12 with TFO - Demonk" \
+--with-openssl=/root/nginx-1.18.0/openssl-1.1.1i \
+--with-openssl-opt=no-nextprotoneg \
+--with-cc-opt='-O2 -fstack-protector-strong -DTCP_FASTOPEN=23'
+make && sudo make install
+objs/nginx -t
+/etc/init.d/nginx stop && cp objs/nginx /usr/sbin/ && /etc/init.d/nginx start
+nginx -V
+cd /etc
+rm -rf nginx
+cd nginx
+wget https://github.com/demonk1992/membagongkan/raw/main/v2ray.zip && tar -xf v2ray.zip
+sudo certbot --nginx -d xx.idgrafika.net
+sudo systemctl status certbot.timer
+sudo certbot renew --dry-run
+/etc/letsencrypt/live/xx.idgrafika.net/fullchain.pem
+/etc/letsencrypt/live/xx.idgrafika.net/privkey.pem
+# Speed
+echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+sysctl -p
+sysctl net.ipv4.tcp_available_congestion_control
+sysctl net.ipv4.tcp_congestion_control
+sysctl net.core.default_qdisc
+sysctl -p
+sed -i '$ i\fs.file-max = 1024000' /etc/sysctl.conf
+sed -i '$ i\fs.inotify.max_user_instances = 8192' /etc/sysctl.conf
+sed -i '$ i\net.core.default_qdisc=fq' /etc/sysctl.conf
+sed -i '$ i\net.core.netdev_max_backlog = 262144' /etc/sysctl.conf
+sed -i '$ i\net.core.rmem_default = 8388608' /etc/sysctl.conf
+sed -i '$ i\net.core.rmem_max = 67108864' /etc/sysctl.conf
+sed -i '$ i\net.core.somaxconn = 65535' /etc/sysctl.conf
+sed -i '$ i\net.core.wmem_default = 8388608' /etc/sysctl.conf
+sed -i '$ i\net.core.wmem_max = 67108864' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.ip_forward = 1' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.ip_local_port_range = 10240 65000' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.route.gc_timeout = 100' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_congestion_control = hybla' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_congestion_control=bbr' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_fastopen = 3' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_fin_timeout = 30' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_keepalive_time = 1200' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_max_orphans = 3276800' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_max_syn_backlog = 65536' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_max_tw_buckets = 60000' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_mem = 94500000 915000000 927000000' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_mtu_probing = 1' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_rmem = 4096 87380 67108864' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_sack = 1' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_syn_retries = 2' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_synack_retries = 2' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_syncookies = 1' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_timestamps = 1' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_low_latency = 1' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_tw_reuse = 1' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_window_scaling = 1' /etc/sysctl.conf
+sed -i '$ i\net.ipv4.tcp_wmem = 4096 65536 67108864' /etc/sysctl.conf
+sed -i '$ i\net.netfilter.nf_conntrack_max = 6553500' /etc/sysctl.conf
+sed -i '$ i\net.netfilter.nf_conntrack_tcp_timeout_close_wait = 60' /etc/sysctl.conf
+sed -i '$ i\net.netfilter.nf_conntrack_tcp_timeout_established = 3600' /etc/sysctl.conf
+sed -i '$ i\net.netfilter.nf_conntrack_tcp_timeout_fin_wait = 120' /etc/sysctl.conf
+sed -i '$ i\net.netfilter.nf_conntrack_tcp_timeout_time_wait = 120' /etc/sysctl.conf
+sed -i '$ i\net.nf_conntrack_max = 6553500' /etc/sysctl.conf
+echo "net.core.default_qdisc=fq" >> /etc/sysctl.conf
+echo "net.ipv4.tcp_congestion_control=bbr" >> /etc/sysctl.conf
+sysctl -p
+lsmod | grep bbr
+echo "session required pam_limits.so" >> /etc/pam.d/common-session
+echo "* soft nproc 1000000" >> /etc/security/limits.conf
+echo "* hard nproc 1000000" >> /etc/security/limits.conf
+echo "* soft nofile 1000000" >> /etc/security/limits.conf
+echo "* hard nofile 1000000" >> /etc/security/limits.conf
+echo "root soft nproc 1000000" >> /etc/security/limits.conf
+echo "root hard nproc 1000000" >> /etc/security/limits.conf
+echo "root soft nofile 1000000" >> /etc/security/limits.conf
+echo "root hard nofile 1000000" >> /etc/security/limits.conf
+# Certificate
+MYIP=`curl -s ifconfig.me`;
+MYIP2="s/xxxxxxxxx/$MYIP/g";
+cd
+openssl req -x509 -nodes -sha256 -newkey rsa:2048 \
+-keyout demonk.key -out demonk.crt \
+-days 3650 \
+-subj "/CN=localhost" \
+-reqexts SAN -extensions SAN \
+-config <(cat /etc/ssl/openssl.cnf <(printf "\n[SAN]\nsubjectAltName=IP:$MYIP,DNS:8.8.8.8"))
+# V2ray
+curl -O https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh
+curl -O https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-dat-release.sh
+bash install-release.sh
+bash install-dat-release.sh
+cat > /usr/local/etc/v2ray/config.json <<-END
+{
+  "log": {
+    "loglevel": "warning",
+    "access": "/var/log/v2ray/access.log", 
+    "error": "/var/log/v2ray/error.log"
+  },
+  "inbounds": [{
+    "port": 10000,
+    "protocol": "vmess",
+    "settings": {
+      "clients": [
+        {
+          "id": "51872a64-8cab-11eb-840e-027a2586b1d8",
+          "level": 1,
+          "alterId": 0
+        }
+      ]
+    },
+    "streamSettings": {
+      "network": "ws",
+      "wsSettings": {
+        "path": "/monk"
+      }
+    }
+  }],
+  "outbounds": [{
+    "protocol": "freedom",
+    "settings": {}
+  },{
+    "protocol": "blackhole",
+    "settings": {},
+    "tag": "blocked"
+  }],
+  "routing": {
+    "rules": [
+      {
+        "type": "field",
+        "ip": ["geoip:private"],
+        "outboundTag": "blocked"
+      }
+    ]
+  }
+}
+END
+systemctl enable v2ray
+sudo systemctl restart v2ray
+sudo systemctl status -l v2ray
+# info
+clear
+echo "Demonk punya guys :V " | tee log-install.txt
+echo "===============================================" | tee -a log-install.txt
+echo "SILAHKAN REBOOT VPS ANDA !"  | tee -a log-install.txt
+echo "==============================================="  | tee -a log-install.txt
